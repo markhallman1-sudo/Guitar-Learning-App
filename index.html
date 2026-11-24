@@ -146,7 +146,7 @@ async function loadIdeas(){
  try{const clips=await listIdeaClips();if(!$('ideaList'))return;
   if(!clips.length){host.innerHTML='<p class="muted">No ideas saved yet. Your recordings will appear here.</p>';return}
   host.innerHTML=clips.map(x=>'<article class="task" style="margin:12px 0"><div class="controls" style="justify-content:space-between"><div><h3>'+escapeHtml(x.title)+'</h3><span class="small muted">'+formatIdeaTime(x.createdAt)+' · '+formatDuration(x.duration)+'</span></div><button data-delete-idea="'+escapeHtml(x.id)+'" aria-label="Delete '+escapeHtml(x.title)+'">Delete</button></div><audio controls preload="none" style="width:100%;margin-top:8px" src="'+URL.createObjectURL(x.blob)+'"></audio></article>').join('');
-  host.querySelectorAll('[data-delete-idea]').forEach(b=>b.onclick=async()=>{await ideaStore('readwrite',s=>s.delete(b.dataset.deleteIdea));loadIdeas()});
+  host.querySelectorAll('[data-delete-idea]').forEach(b=>b.onclick=async()=>{if(!window.confirm('Are you sure you want to delete this recording? This cannot be undone.'))return; b.disabled=true; try{await ideaStore('readwrite',s=>s.delete(b.dataset.deleteIdea));await loadIdeas()}catch(e){b.disabled=false;ideaStatus('Could not delete recording: '+(e.message||e))}});
  }catch(e){host.innerHTML='<p class="muted">Saved ideas are unavailable: '+escapeHtml(e.message)+'</p>'}
 }
 
